@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack Pro | Dashboard</title>
+    <!-- Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Link to the PWA manifest file -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- Theme color for the browser UI -->
+    <meta name="theme-color" content="#2d3748">
+</head>
+<body>
+    <main>
+        <!-- The sidebar is a common component across all pages -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <!-- App logo and title -->
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-banknote">
+                    <rect width="20" height="12" x="2" y="6" rx="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <path d="M6 12h.01"/>
+                    <path d="M18 12h.01"/>
+                </svg>
+                <span class="app-title">FinTrack Pro</span>
+            </div>
+
+            <!-- Business selection dropdown -->
+            <div class="sidebar-section">
+                <label for="business-select" class="block text-sm font-medium">Select Business</label>
+                <select id="business-select" class="dropdown mt-1">
+                    <option value="all-businesses">All Businesses</option>
+                </select>
+            </div>
+
+            <!-- Navigation links -->
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-link active">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard">
+                        <rect x="3" y="3" width="7" height="9"/>
+                        <rect x="14" y="3" width="7" height="5"/>
+                        <rect x="14" y="12" width="7" height="9"/>
+                        <rect x="3" y="16" width="7" height="5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="transactions.html" class="nav-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text">
+                        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+                        <path d="M14 8H8"/>
+                        <path d="M16 12H8"/>
+                        <path d="M16 16H8"/>
+                    </svg>
+                    Transactions
+                </a>
+            </nav>
+
+            <!-- Optional Dark Mode Toggle -->
+            <div class="theme-toggle">
+                <button id="theme-toggle-btn" aria-label="Toggle dark mode">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main content area -->
+        <section class="main-content">
+            <header class="main-header">
+                <h1 id="dashboard-title" class="page-title"></h1>
+                <div class="header-actions">
+                    <button id="export-csv-btn" class="btn btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                            <path d="M10 9H8"/>
+                            <path d="M16 13H8"/>
+                            <path d="M16 17H8"/>
+                        </svg>
+                        Export CSV
+                    </button>
+                    <button id="add-entry-btn" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 12h8"/>
+                            <path d="M12 8v8"/>
+                        </svg>
+                        Add Entry
+                    </button>
+                </div>
+            </header>
+            
+            <div id="dashboard-content">
+                <!-- Statistics Cards -->
+                <div class="stats-cards">
+                    <div class="card stat-card">
+                        <div class="flex-grow">
+                            <p class="text-sm">Total Income</p>
+                            <h2 id="total-income" class="stat-value text-green-500"></h2>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-circle text-green-500">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m16 12-4-4-4 4"/>
+                            <path d="M12 16V8"/>
+                        </svg>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="flex-grow">
+                            <p class="text-sm">Total Expenses</p>
+                            <h2 id="total-expenses" class="stat-value text-red-500"></h2>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-circle text-red-500">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m8 12 4 4 4-4"/>
+                            <path d="M12 8v8"/>
+                        </svg>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="flex-grow">
+                            <p class="text-sm">Net Balance</p>
+                            <h2 id="net-balance" class="stat-value"></h2>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-2">
+                            <path d="M17 14h.01"/>
+                            <path d="M7 7h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/>
+                            <path d="M12 12v4"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="chart-section">
+                    <div class="card monthly-chart-card">
+                        <h3 class="card-title">Monthly Overview (Last 6 Months)</h3>
+                        <div id="monthly-chart" class="chart-container">
+                            <!-- Bar chart will be rendered here by JS -->
+                        </div>
+                    </div>
+                    <div class="card category-chart-card">
+                        <h3 class="card-title">Category Breakdown</h3>
+                        <div class="chart-header">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="chart-toggle-input">
+                                <label for="chart-toggle-input" class="toggle-label"></label>
+                            </div>
+                            <span class="toggle-text" id="chart-toggle-label">Expenses</span>
+                        </div>
+                        <div id="pie-chart-container" class="chart-container">
+                            <div class="pie-chart" id="pie-chart"></div>
+                            <div class="legend" id="pie-chart-legend"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Table -->
+                <div class="card recent-transactions-card">
+                    <h3 class="card-title">Recent Transactions</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Business</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-transactions-table-body">
+                                <!-- Transaction rows will be rendered here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- The Add Entry Modal -->
+    <div id="add-entry-modal" class="modal-overlay hidden">
+        <div class="modal card">
+            <div class="modal-header">
+                <h3 class="card-title">Add New Transaction</h3>
+                <button id="close-modal-btn" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="add-transaction-form" class="mt-4">
+                <div class="form-group">
+                    <label for="transaction-title">Title</label>
+                    <input type="text" id="transaction-title" placeholder="e.g. Fuel for Truck AB-123" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-business">Business</label>
+                    <select id="transaction-business" required>
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-category">Category</label>
+                    <select id="transaction-category" required>
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-amount">Amount</label>
+                    <input type="number" id="transaction-amount" placeholder="e.g. 7500" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-date">Date</label>
+                    <input type="date" id="transaction-date" required>
+                </div>
+                <div class="form-group flex-row">
+                    <div class="radio-group">
+                        <input type="radio" id="type-income" name="transaction-type" value="income" required checked>
+                        <label for="type-income" class="radio-label">Income</label>
+                    </div>
+                    <div class="radio-group">
+                        <input type="radio" id="type-expense" name="transaction-type" value="expense" required>
+                        <label for="type-expense" class="radio-label">Expense</label>
+                    </div>
+                </div>
+                <div class="form-actions mt-6">
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

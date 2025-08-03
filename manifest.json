@@ -1,0 +1,21 @@
+{
+    "name": "JosanTrack",
+    "short_name": "JosanTrack",
+    "description": "A simple and elegant financial tracking application.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#d5d4d0",
+    "theme_color": "#2d3748",
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
