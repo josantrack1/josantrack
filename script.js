@@ -1,8 +1,3 @@
-// script.js
-
-// --- 1. INITIAL DATA AND LOCAL STORAGE MANAGEMENT ---
-
-// Initial data as specified in the prompt
 const initialData = {
     businesses: [
         { id: 'biz-1', name: 'Truck Transport Business', currency: 'INR' },
@@ -50,6 +45,7 @@ const initialData = {
         { id: 'cat-99', name: 'Misc', type: 'expense', businessId: 'all', color: 'hsl(280, 75%, 55%)' },
         { id: 'cat-100', name: 'Misc', type: 'income', businessId: 'all', color: 'hsl(160, 70%, 45%)' },
     ],
+    // The transactions array will now hold both business and house expenses
     transactions: [],
 };
 
@@ -117,8 +113,13 @@ const modalForm = document.getElementById('add-transaction-form');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const cancelModalBtn = document.getElementById('cancel-modal-btn');
 const addEntryBtns = document.querySelectorAll('#add-entry-btn');
+const deleteModal = document.getElementById('delete-modal');
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-// --- 3. COMMON FUNCTIONS (Sidebar, Modal, CSV) ---
+let currentTransactionIdToDelete = null;
+
+// --- 3. COMMON FUNCTIONS (Sidebar, Modal, CRUD) ---
 
 /**
  * Populates the business selection dropdown.
@@ -127,26 +128,29 @@ function populateBusinessDropdown() {
     const selectedBusinessId = localStorage.getItem('selectedBusinessId') || 'all-businesses';
     
     // Clear existing options
-    businessSelect.innerHTML = '<option value="all-businesses">All Businesses</option>';
-    
-    businesses.forEach(business => {
-        const option = document.createElement('option');
-        option.value = business.id;
-        option.textContent = business.name;
-        businessSelect.appendChild(option);
-    });
-
-    // Set the selected value to the persisted state
-    businessSelect.value = selectedBusinessId;
+    if (businessSelect) {
+        businessSelect.innerHTML = '<option value="all-businesses">All Businesses</option>';
+        businesses.forEach(business => {
+            const option = document.createElement('option');
+            option.value = business.id;
+            option.textContent = business.name;
+            businessSelect.appendChild(option);
+        });
+        // Set the selected value to the persisted state
+        businessSelect.value = selectedBusinessId;
+    }
 }
 
 /**
  * Populates the category dropdown in the Add Entry modal based on the selected business.
+ * This is only for business transactions.
  * @param {string} businessId The ID of the currently selected business.
  */
 function populateModalCategoryDropdown(businessId) {
     const categorySelect = document.getElementById('transaction-category');
-    const businessSelect = document.getElementById('transaction-business');
+    const businessSelectModal = document.getElementById('transaction-business');
+
+    if (!categorySelect || !businessSelectModal) return;
 
     // Clear existing options
     categorySelect.innerHTML = '';
@@ -162,30 +166,50 @@ function populateModalCategoryDropdown(businessId) {
     });
 
     // Also populate the business dropdown in the modal
-    businessSelect.innerHTML = '';
+    businessSelectModal.innerHTML = '';
     businesses.forEach(business => {
         const option = document.createElement('option');
         option.value = business.id;
         option.textContent = business.name;
-        businessSelect.appendChild(option);
+        businessSelectModal.appendChild(option);
     });
-    businessSelect.value = businessId; // Pre-select the current business
+    businessSelectModal.value = businessId; // Pre-select the current business
     
     // Add a change listener for the modal business select
-    businessSelect.addEventListener('change', (e) => {
+    businessSelectModal.addEventListener('change', (e) => {
         populateModalCategoryDropdown(e.target.value);
     });
 }
 
 /**
  * Opens the add entry modal.
+ * @param {string} type The transaction type ('business' or 'house').
  */
-function openModal() {
-    const selectedBusinessId = localStorage.getItem('selectedBusinessId') || 'all-businesses';
-    populateModalCategoryDropdown(selectedBusinessId === 'all-businesses' ? businesses[0].id : selectedBusinessId);
-    
+function openModal(type = 'business') {
     // Reset the form
     modalForm.reset();
+    document.getElementById('transaction-id').value = ''; // Clear ID for new transaction
+
+    const selectedBusinessId = localStorage.getItem('selectedBusinessId') || 'all-businesses';
+    const businessFields = document.getElementById('business-fields');
+    const typeRadioButtons = document.getElementById('type-radio-buttons');
+    const modalTitle = document.getElementById('modal-title');
+    const submitBtn = document.getElementById('modal-submit-btn');
+
+    document.getElementById('transaction-type-hidden').value = type;
+
+    if (type === 'house') {
+        if (businessFields) businessFields.style.display = 'none';
+        if (typeRadioButtons) typeRadioButtons.style.display = 'none';
+        modalTitle.textContent = 'Add New House Expense';
+        submitBtn.textContent = 'Add Expense';
+    } else {
+        if (businessFields) businessFields.style.display = 'block';
+        if (typeRadioButtons) typeRadioButtons.style.display = 'flex';
+        modalTitle.textContent = 'Add New Business Transaction';
+        submitBtn.textContent = 'Add Transaction';
+        populateModalCategoryDropdown(selectedBusinessId === 'all-businesses' ? businesses[0].id : selectedBusinessId);
+    }
     
     // Set the date input to today's date by default
     const dateInput = document.getElementById('transaction-date');
@@ -196,38 +220,132 @@ function openModal() {
 }
 
 /**
- * Closes the add entry modal.
+ * Opens the modal to edit an existing transaction.
+ * @param {string} transactionId The ID of the transaction to edit.
+ */
+function openEditModal(transactionId) {
+    const transaction = findById(transactions, transactionId);
+    if (!transaction) return;
+
+    openModal(transaction.transactionType);
+    
+    document.getElementById('transaction-id').value = transaction.id;
+    document.getElementById('modal-title').textContent = 'Edit Transaction';
+    document.getElementById('modal-submit-btn').textContent = 'Save Changes';
+    
+    // Populate form fields
+    document.getElementById('transaction-title').value = transaction.title;
+    document.getElementById('transaction-amount').value = transaction.amount;
+    document.getElementById('transaction-date').value = transaction.date;
+
+    if (transaction.transactionType === 'business') {
+        document.getElementById('transaction-business').value = transaction.businessId;
+        populateModalCategoryDropdown(transaction.businessId); // Repopulate categories for the correct business
+        document.getElementById('transaction-category').value = transaction.categoryId;
+        document.querySelector(`input[name="transaction-type"][value="${transaction.type}"]`).checked = true;
+    }
+}
+
+/**
+ * Closes the add/edit entry modal.
  */
 function closeModal() {
     modal.classList.add('hidden');
 }
 
 /**
- * Handles form submission for adding a new transaction.
+ * Opens the delete confirmation modal.
+ * @param {string} transactionId The ID of the transaction to delete.
+ */
+function openDeleteModal(transactionId) {
+    currentTransactionIdToDelete = transactionId;
+    deleteModal.classList.remove('hidden');
+}
+
+/**
+ * Closes the delete confirmation modal.
+ */
+function closeDeleteModal() {
+    deleteModal.classList.add('hidden');
+    currentTransactionIdToDelete = null;
+}
+
+/**
+ * Handles form submission for adding or updating a transaction.
  * @param {Event} e The form submit event.
  */
 function handleFormSubmit(e) {
     e.preventDefault();
 
-    const newTransaction = {
-        id: `trans-${Date.now()}`,
-        businessId: document.getElementById('transaction-business').value,
-        categoryId: document.getElementById('transaction-category').value,
+    const transactionId = document.getElementById('transaction-id').value;
+    const transactionType = document.getElementById('transaction-type-hidden').value;
+    
+    // Common fields
+    const commonFields = {
         title: document.getElementById('transaction-title').value,
         amount: parseFloat(document.getElementById('transaction-amount').value),
         date: document.getElementById('transaction-date').value,
-        type: document.querySelector('input[name="transaction-type"]:checked').value,
+        transactionType: transactionType,
     };
+    
+    let newTransaction;
 
-    transactions.push(newTransaction);
+    if (transactionType === 'house') {
+        newTransaction = {
+            ...commonFields,
+            type: 'expense'
+        };
+    } else {
+        const businessFields = {
+            businessId: document.getElementById('transaction-business').value,
+            categoryId: document.getElementById('transaction-category').value,
+            type: document.querySelector('input[name="transaction-type"]:checked').value,
+        };
+        newTransaction = { ...commonFields, ...businessFields };
+    }
+
+    if (transactionId) {
+        // Update existing transaction
+        const transactionIndex = transactions.findIndex(t => t.id === transactionId);
+        if (transactionIndex !== -1) {
+            transactions[transactionIndex] = { ...transactions[transactionIndex], ...newTransaction };
+        }
+    } else {
+        // Add new transaction
+        newTransaction.id = `trans-${Date.now()}`;
+        transactions.push(newTransaction);
+    }
+    
     saveData('transactions', transactions);
     closeModal();
     
-    // Re-render the correct page content after adding a new transaction
+    // Re-render the correct page content after the action
     if (document.title.includes('Dashboard')) {
         renderDashboard();
-    } else if (document.title.includes('Transactions')) {
-        renderTransactionsPage();
+    } else if (document.title.includes('House Expenses')) {
+        renderHousePage();
+    } else if (document.title.includes('All Transactions')) {
+        filterAndRenderTransactions();
+    }
+}
+
+/**
+ * Handles deletion of a transaction.
+ */
+function deleteTransaction() {
+    if (currentTransactionIdToDelete) {
+        transactions = transactions.filter(t => t.id !== currentTransactionIdToDelete);
+        saveData('transactions', transactions);
+        closeDeleteModal();
+
+        // Re-render the correct page content after deletion
+        if (document.title.includes('Dashboard')) {
+            renderDashboard();
+        } else if (document.title.includes('House Expenses')) {
+            renderHousePage();
+        } else if (document.title.includes('All Transactions')) {
+            filterAndRenderTransactions();
+        }
     }
 }
 
@@ -238,12 +356,12 @@ function handleFormSubmit(e) {
 function exportCSV(data) {
     const header = ['Title', 'Business', 'Category', 'Date', 'Type', 'Amount'].join(',');
     const rows = data.map(t => {
-        const business = findById(businesses, t.businessId)?.name || 'N/A';
-        const category = findById(categories, t.categoryId)?.name || 'N/A';
+        const businessName = t.businessId ? findById(businesses, t.businessId)?.name || 'N/A' : 'House';
+        const categoryName = t.categoryId ? findById(categories, t.categoryId)?.name || 'N/A' : 'N/A';
         return [
             `"${t.title.replace(/"/g, '""')}"`, // Handle quotes in title
-            `"${business.replace(/"/g, '""')}"`,
-            `"${category.replace(/"/g, '""')}"`,
+            `"${businessName.replace(/"/g, '""')}"`,
+            `"${categoryName.replace(/"/g, '""')}"`,
             t.date,
             t.type,
             t.amount,
@@ -281,10 +399,10 @@ function toggleTheme() {
  */
 function renderDashboard() {
     const selectedBusinessId = localStorage.getItem('selectedBusinessId');
-    let filteredTransactions = transactions;
+    let filteredTransactions = transactions.filter(t => t.transactionType === 'business');
 
     if (selectedBusinessId && selectedBusinessId !== 'all-businesses') {
-        filteredTransactions = transactions.filter(t => t.businessId === selectedBusinessId);
+        filteredTransactions = filteredTransactions.filter(t => t.businessId === selectedBusinessId);
     }
 
     // Set dashboard title
@@ -458,65 +576,72 @@ function renderPieChart(transactionsData, type) {
     pieChart.style.background = gradientString;
 }
 
-// --- 5. TRANSACTIONS PAGE SPECIFIC LOGIC (transactions.html) ---
+// --- 5. HOUSE EXPENSES PAGE SPECIFIC LOGIC (house.html) ---
+function renderHousePage() {
+    const houseExpenses = transactions.filter(t => t.transactionType === 'house');
+    const totalHouseExpenses = houseExpenses.reduce((sum, t) => sum + t.amount, 0);
 
-/**
- * Renders the transactions page content.
- */
-function renderTransactionsPage() {
-    const selectedBusinessId = localStorage.getItem('selectedBusinessId') || 'all-businesses';
-    
-    // Get filter elements
-    const searchInput = document.getElementById('search-input');
-    const categoryFilterSelect = document.getElementById('category-filter-select');
-    const typeFilterSelect = document.getElementById('type-filter-select');
-
-    // Populate category filter dropdown
-    populateTransactionFilters(selectedBusinessId);
-
-    // Initial render of the table
-    filterAndRenderTransactions();
-
-    // Add event listeners for filters
-    searchInput?.addEventListener('input', filterAndRenderTransactions);
-    categoryFilterSelect?.addEventListener('change', filterAndRenderTransactions);
-    typeFilterSelect?.addEventListener('change', filterAndRenderTransactions);
-    
-    // Re-render when selected business changes from sidebar
-    businessSelect?.addEventListener('change', () => {
-        populateTransactionFilters(businessSelect.value);
-        filterAndRenderTransactions();
-    });
-}
-
-/**
- * Populates the category filter dropdown for the transactions page.
- * @param {string} businessId The currently selected business ID.
- */
-function populateTransactionFilters(businessId) {
-    const categoryFilterSelect = document.getElementById('category-filter-select');
-    if (!categoryFilterSelect) return;
-    
-    categoryFilterSelect.innerHTML = '<option value="all">All Categories</option>';
-    
-    let relevantCategories;
-    if (businessId === 'all-businesses') {
-        // Show all categories for all businesses
-        relevantCategories = categories.filter(c => c.businessId !== 'all');
-        const miscCategories = categories.filter(c => c.businessId === 'all');
-        relevantCategories = [...relevantCategories, ...miscCategories];
-    } else {
-        // Show categories for the specific business and shared categories
-        relevantCategories = categories.filter(c => c.businessId === businessId || c.businessId === 'all');
+    const totalExpensesElement = document.getElementById('total-house-expenses');
+    if (totalExpensesElement) {
+        totalExpensesElement.textContent = formatCurrency(totalHouseExpenses, 'INR');
     }
 
-    relevantCategories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = `${category.name} (${category.type})`;
-        categoryFilterSelect.appendChild(option);
+    const houseTransactionsBody = document.getElementById('house-transactions-table-body');
+    if (houseTransactionsBody) {
+        renderHouseTableRows(houseExpenses, houseTransactionsBody);
+    }
+}
+
+/**
+ * Renders transaction rows for the house expenses table.
+ * @param {Array} transactionsToRender The transactions to display.
+ * @param {HTMLElement} tableBody The tbody element to populate.
+ */
+function renderHouseTableRows(transactionsToRender, tableBody) {
+    tableBody.innerHTML = '';
+    if (transactionsToRender.length === 0) {
+        const noDataRow = document.createElement('tr');
+        noDataRow.innerHTML = `<td colspan="4" class="text-center">No house expenses found.</td>`;
+        tableBody.appendChild(noDataRow);
+        return;
+    }
+
+    transactionsToRender.forEach(t => {
+        const row = document.createElement('tr');
+        row.className = 'expense-row';
+        
+        const actionsHtml = `
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary btn-sm" onclick="openEditModal('${t.id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="openDeleteModal('${t.id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+                </button>
+            </div>
+        `;
+        const amountHtml = `
+            <div class="amount-cell">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-circle text-red-500">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m8 12 4 4 4-4"/>
+                    <path d="M12 8v8"/>
+                </svg>
+                <span>${formatCurrency(t.amount, 'INR')}</span>
+            </div>
+        `;
+        
+        row.innerHTML = `
+            <td>${t.title}</td>
+            <td>${t.date}</td>
+            <td class="text-right">${amountHtml}</td>
+            <td class="text-right">${actionsHtml}</td>
+        `;
+        tableBody.appendChild(row);
     });
 }
+
+// --- 6. ALL TRANSACTIONS PAGE SPECIFIC LOGIC (transactions.html) ---
 
 /**
  * Filters and renders the full transaction table.
@@ -555,7 +680,7 @@ function filterAndRenderTransactions() {
 
     const fullTransactionsBody = document.getElementById('full-transactions-table-body');
     if (fullTransactionsBody) {
-        renderTableRows(filteredTransactions, fullTransactionsBody);
+        renderTableRows(filteredTransactions, fullTransactionsBody, true);
     }
 }
 
@@ -563,21 +688,34 @@ function filterAndRenderTransactions() {
  * Renders transaction rows into a table body element.
  * @param {Array} transactionsToRender The transactions to display.
  * @param {HTMLElement} tableBody The tbody element to populate.
+ * @param {boolean} showBusinessDetails Flag to show business and category columns.
  */
-function renderTableRows(transactionsToRender, tableBody) {
+function renderTableRows(transactionsToRender, tableBody, showBusinessDetails = true) {
     tableBody.innerHTML = '';
     if (transactionsToRender.length === 0) {
+        const colspan = showBusinessDetails ? 6 : 4;
         const noDataRow = document.createElement('tr');
-        noDataRow.innerHTML = `<td colspan="5" class="text-center">No transactions found.</td>`;
+        noDataRow.innerHTML = `<td colspan="${colspan}" class="text-center">No transactions found.</td>`;
         tableBody.appendChild(noDataRow);
         return;
     }
 
     transactionsToRender.forEach(t => {
-        const business = findById(businesses, t.businessId);
-        const category = findById(categories, t.categoryId);
+        const business = t.businessId ? findById(businesses, t.businessId) : null;
+        const category = t.categoryId ? findById(categories, t.categoryId) : null;
         const row = document.createElement('tr');
         row.className = t.type === 'income' ? 'income-row' : 'expense-row';
+
+        const actionsHtml = `
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-secondary btn-sm" onclick="openEditModal('${t.id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="openDeleteModal('${t.id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+                </button>
+            </div>
+        `;
         
         const arrowSvg = t.type === 'income' ? `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-circle">
@@ -591,10 +729,17 @@ function renderTableRows(transactionsToRender, tableBody) {
                 <path d="M12 8v8"/>
             </svg>`;
 
+        let businessDetailsHtml = '';
+        if (showBusinessDetails) {
+            businessDetailsHtml = `
+                <td>${business?.name || 'House'}</td>
+                <td>${category?.name || 'N/A'}</td>
+            `;
+        }
+
         row.innerHTML = `
             <td>${t.title}</td>
-            <td>${business?.name || 'N/A'}</td>
-            <td>${category?.name || 'N/A'}</td>
+            ${businessDetailsHtml}
             <td>${t.date}</td>
             <td class="text-right">
                 <div class="amount-cell">
@@ -602,12 +747,20 @@ function renderTableRows(transactionsToRender, tableBody) {
                     <span>${formatCurrency(t.amount, business?.currency || 'INR')}</span>
                 </div>
             </td>
+            <td class="text-right">${actionsHtml}</td>
         `;
         tableBody.appendChild(row);
+
+        // Add event listeners for new buttons
+        const editButton = row.querySelector('.lucide-edit').closest('button');
+        const deleteButton = row.querySelector('.lucide-trash-2').closest('button');
+        editButton.onclick = () => openEditModal(t.id);
+        deleteButton.onclick = () => openDeleteModal(t.id);
     });
 }
 
-// --- 6. EVENT LISTENERS AND INITIALIZATION ---
+
+// --- 7. EVENT LISTENERS AND INITIALIZATION ---
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeData();
@@ -623,18 +776,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-render the correct page content after business selection changes
         if (document.title.includes('Dashboard')) {
             renderDashboard();
-        } else if (document.title.includes('Transactions')) {
-            renderTransactionsPage();
+        } else if (document.title.includes('All Transactions')) {
+            filterAndRenderTransactions();
         }
     });
 
     // Add Entry buttons to open modal
-    addEntryBtns.forEach(btn => btn.addEventListener('click', openModal));
+    addEntryBtns.forEach(btn => btn.addEventListener('click', () => {
+        const type = btn.dataset.type || 'business';
+        openModal(type);
+    }));
     
     // Modal buttons
     closeModalBtn?.addEventListener('click', closeModal);
     cancelModalBtn?.addEventListener('click', closeModal);
     modalForm?.addEventListener('submit', handleFormSubmit);
+
+    // Delete Modal buttons
+    confirmDeleteBtn?.addEventListener('click', deleteTransaction);
+    cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
 
     // CSV export button (only on dashboard page)
     const exportCsvBtn = document.getElementById('export-csv-btn');
@@ -655,7 +815,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call the appropriate render function based on the current page
     if (document.title.includes('Dashboard')) {
         renderDashboard();
-    } else if (document.title.includes('Transactions')) {
-        renderTransactionsPage();
+    } else if (document.title.includes('House Expenses')) {
+        renderHousePage();
+    } else if (document.title.includes('All Transactions')) {
+        filterAndRenderTransactions();
     }
 });

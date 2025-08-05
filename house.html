@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinTrack Pro | All Transactions</title>
+    <title>FinTrack Pro | House Expenses</title>
     <!-- Inter font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,8 +27,8 @@
                 <span class="app-title">FinTrack Pro</span>
             </div>
 
-            <!-- Business selection dropdown -->
-            <div class="sidebar-section">
+            <!-- Business selection dropdown is not needed for house expenses -->
+            <div class="sidebar-section hidden-on-house">
                 <label for="business-select" class="block text-sm font-medium">Select Business</label>
                 <select id="business-select" class="dropdown mt-1">
                     <option value="all-businesses">All Businesses</option>
@@ -46,14 +46,14 @@
                     </svg>
                     Dashboard
                 </a>
-                <a href="house.html" class="nav-link">
+                <a href="house.html" class="nav-link active">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
                         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>
                     House Expenses
                 </a>
-                <a href="transactions.html" class="nav-link active">
+                <a href="transactions.html" class="nav-link">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text">
                         <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
                         <path d="M14 8H8"/>
@@ -63,11 +63,11 @@
                     All Transactions
                 </a>
             </nav>
-            
+
             <!-- Optional Dark Mode Toggle -->
             <div class="theme-toggle">
                 <button id="theme-toggle-btn" aria-label="Toggle dark mode">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucude-moon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon">
                         <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
                     </svg>
                 </button>
@@ -77,57 +77,49 @@
         <!-- Main content area -->
         <section class="main-content">
             <header class="main-header">
-                <h1 class="page-title">All Transactions</h1>
+                <h1 class="page-title">House Expenses</h1>
                 <div class="header-actions">
-                    <button id="add-entry-btn" class="btn btn-primary" data-type="business">
+                    <button id="add-entry-btn" class="btn btn-primary" data-type="house">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M8 12h8"/>
                             <path d="M12 8v8"/>
                         </svg>
-                        Add Transaction
+                        Add Expense
                     </button>
                 </div>
             </header>
             
-            <div id="transactions-content">
-                <!-- Filter Controls -->
-                <div class="card filter-controls mb-6">
-                    <div class="filter-group">
-                        <label for="search-input">Search Title</label>
-                        <input type="text" id="search-input" placeholder="Search by title...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="category-filter-select">Category</label>
-                        <select id="category-filter-select">
-                            <option value="all">All Categories</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="type-filter-select">Type</label>
-                        <select id="type-filter-select">
-                            <option value="all">All Types</option>
-                            <option value="income">Income</option>
-                            <option value="expense">Expense</option>
-                        </select>
+            <div id="house-content">
+                <!-- Statistics Cards -->
+                <div class="stats-cards">
+                    <div class="card stat-card">
+                        <div class="flex-grow">
+                            <p class="text-sm">Total House Expenses</p>
+                            <h2 id="total-house-expenses" class="stat-value text-red-500"></h2>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-2">
+                            <path d="M17 14h.01"/>
+                            <path d="M7 7h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/>
+                            <path d="M12 12v4"/>
+                        </svg>
                     </div>
                 </div>
 
-                <!-- Transactions Table -->
-                <div class="card transactions-table-card">
+                <!-- House Transactions Table -->
+                <div class="card house-transactions-card">
+                    <h3 class="card-title">All House Expenses</h3>
                     <div class="table-responsive">
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Title</th>
-                                    <th>Business</th>
-                                    <th>Category</th>
                                     <th>Date</th>
                                     <th class="text-right">Amount</th>
                                     <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-transactions-table-body">
+                            <tbody id="house-transactions-table-body">
                                 <!-- Transaction rows will be rendered here by JS -->
                             </tbody>
                         </table>
@@ -141,7 +133,7 @@
     <div id="add-entry-modal" class="modal-overlay hidden">
         <div class="modal card">
             <div class="modal-header">
-                <h3 id="modal-title" class="card-title">Add New Transaction</h3>
+                <h3 id="modal-title" class="card-title">Add New House Expense</h3>
                 <button id="close-modal-btn" class="close-btn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
                         <path d="M18 6 6 18"/>
@@ -154,48 +146,24 @@
                 <input type="hidden" id="transaction-type-hidden">
                 <div class="form-group">
                     <label for="transaction-title">Title</label>
-                    <input type="text" id="transaction-title" placeholder="e.g. Fuel for Truck AB-123" required>
-                </div>
-                <div id="business-fields">
-                    <div class="form-group">
-                        <label for="transaction-business">Business</label>
-                        <select id="transaction-business" required>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="transaction-category">Category</label>
-                        <select id="transaction-category" required>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
+                    <input type="text" id="transaction-title" placeholder="e.g. Groceries" required>
                 </div>
                 <div class="form-group">
                     <label for="transaction-amount">Amount</label>
-                    <input type="number" id="transaction-amount" placeholder="e.g. 7500" required>
+                    <input type="number" id="transaction-amount" placeholder="e.g. 5000" required>
                 </div>
                 <div class="form-group">
                     <label for="transaction-date">Date</label>
                     <input type="date" id="transaction-date" required>
                 </div>
-                <div class="form-group flex-row" id="type-radio-buttons">
-                    <div class="radio-group">
-                        <input type="radio" id="type-income" name="transaction-type" value="income" required checked>
-                        <label for="type-income" class="radio-label">Income</label>
-                    </div>
-                    <div class="radio-group">
-                        <input type="radio" id="type-expense" name="transaction-type" value="expense" required>
-                        <label for="type-expense" class="radio-label">Expense</label>
-                    </div>
-                </div>
                 <div class="form-actions mt-6">
-                    <button type="submit" id="modal-submit-btn" class="btn btn-primary">Add Transaction</button>
+                    <button type="submit" id="modal-submit-btn" class="btn btn-primary">Add Expense</button>
                     <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
-
+    
     <!-- The Delete Confirmation Modal -->
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="modal card">
@@ -207,7 +175,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

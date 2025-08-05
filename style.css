@@ -454,6 +454,10 @@ input:checked + .toggle-label:before {
     gap: 0.5rem;
 }
 
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+}
+
 .btn-primary {
     background-color: var(--primary);
     color: var(--primary-foreground);
@@ -540,6 +544,18 @@ input:checked + .toggle-label:before {
     gap: 1.5rem;
 }
 
+.flex {
+    display: flex;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
 /* Modal */
 .modal-overlay {
     position: fixed;
@@ -594,6 +610,7 @@ input:checked + .toggle-label:before {
 .block { display: block; }
 .text-sm { font-size: 0.875rem; }
 .text-right { text-align: right; }
+.text-center { text-align: center; }
 .font-medium { font-weight: 500; }
 .flex-grow { flex-grow: 1; }
 
