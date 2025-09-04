@@ -101,6 +101,18 @@
             </header>
             
             <div id="dashboard-content">
+                <!-- Date Filters -->
+                <div class="card filter-controls mb-6">
+                    <div class="filter-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date">
+                    </div>
+                    <div class="filter-group">
+                        <label for="end-date">End Date</label>
+                        <input type="date" id="end-date">
+                    </div>
+                </div>
+
                 <!-- Statistics Cards -->
                 <div class="stats-cards">
                     <div class="card stat-card">
@@ -202,10 +214,24 @@
             <form id="add-transaction-form" class="mt-4">
                 <input type="hidden" id="transaction-id">
                 <input type="hidden" id="transaction-type-hidden">
+                
+                <!-- Moved radio buttons to the top -->
+                <div class="form-group flex-row" id="type-radio-buttons">
+                    <div class="radio-group">
+                        <input type="radio" id="type-income" name="transaction-type" value="income" required checked>
+                        <label for="type-income" class="radio-label">Income</label>
+                    </div>
+                    <div class="radio-group">
+                        <input type="radio" id="type-expense" name="transaction-type" value="expense" required>
+                        <label for="type-expense" class="radio-label">Expense</label>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="transaction-title">Title</label>
                     <input type="text" id="transaction-title" placeholder="e.g. Fuel for Truck AB-123" required>
                 </div>
+                
                 <div id="business-fields">
                     <div class="form-group">
                         <label for="transaction-business">Business</label>
@@ -220,6 +246,7 @@
                         </select>
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="transaction-amount">Amount</label>
                     <input type="number" id="transaction-amount" placeholder="e.g. 7500" required>
@@ -228,16 +255,7 @@
                     <label for="transaction-date">Date</label>
                     <input type="date" id="transaction-date" required>
                 </div>
-                <div class="form-group flex-row" id="type-radio-buttons">
-                    <div class="radio-group">
-                        <input type="radio" id="type-income" name="transaction-type" value="income" required checked>
-                        <label for="type-income" class="radio-label">Income</label>
-                    </div>
-                    <div class="radio-group">
-                        <input type="radio" id="type-expense" name="transaction-type" value="expense" required>
-                        <label for="type-expense" class="radio-label">Expense</label>
-                    </div>
-                </div>
+                
                 <div class="form-actions mt-6">
                     <button type="submit" id="modal-submit-btn" class="btn btn-primary">Add Transaction</button>
                     <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>

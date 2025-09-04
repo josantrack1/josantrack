@@ -1,3 +1,8 @@
+// script.js
+
+// --- 1. INITIAL DATA AND LOCAL STORAGE MANAGEMENT ---
+
+// Initial data as specified in the prompt
 const initialData = {
     businesses: [
         { id: 'biz-1', name: 'Truck Transport Business', currency: 'INR' },
@@ -5,45 +10,64 @@ const initialData = {
         { id: 'biz-3', name: 'Dairy Business', currency: 'INR' },
         { id: 'biz-4', name: 'Agriculture', currency: 'INR' },
     ],
+    // The categories array now contains all categories, but they will be filtered by business and type in the UI.
     categories: [
-        // Truck Transport
+        // Truck Transport - Income
         { id: 'cat-1', name: 'Transport Income', type: 'income', businessId: 'biz-1', color: 'hsl(220, 80%, 50%)' },
+        { id: 'cat-100', name: 'Misc', type: 'income', businessId: 'biz-1', color: 'hsl(160, 70%, 45%)' },
+        // Truck Transport - Expense
         { id: 'cat-2', name: 'Fuel', type: 'expense', businessId: 'biz-1', color: 'hsl(20, 80%, 60%)' },
         { id: 'cat-3', name: 'Driver Salary', type: 'expense', businessId: 'biz-1', color: 'hsl(280, 75%, 55%)' },
-        { id: 'cat-4', name: 'Maintenance', type: 'expense', businessId: 'biz-1', color: 'hsl(340, 80%, 65%)' },
+        { id: 'cat-4', name: 'Maintainance', type: 'expense', businessId: 'biz-1', color: 'hsl(340, 80%, 65%)' },
         { id: 'cat-5', name: 'Repairing', type: 'expense', businessId: 'biz-1', color: 'hsl(160, 70%, 45%)' },
         { id: 'cat-6', name: 'Commission', type: 'expense', businessId: 'biz-1', color: 'hsl(20, 80%, 60%)' },
-        // Rock Salt
+        { id: 'cat-32', name: 'Fastag', type: 'expense', businessId: 'biz-1', color: 'hsl(280, 75%, 55%)' },
+        { id: 'cat-99', name: 'Misc', type: 'expense', businessId: 'biz-1', color: 'hsl(160, 70%, 45%)' },
+
+        // Rock Salt - Income
         { id: 'cat-7', name: 'Amazon Sales', type: 'income', businessId: 'biz-2', color: 'hsl(220, 80%, 50%)' },
         { id: 'cat-8', name: 'Sales', type: 'income', businessId: 'biz-2', color: 'hsl(340, 80%, 65%)' },
+        { id: 'cat-101', name: 'Misc', type: 'income', businessId: 'biz-2', color: 'hsl(160, 70%, 45%)' },
+        // Rock Salt - Expense
         { id: 'cat-9', name: 'Labour Salaries', type: 'expense', businessId: 'biz-2', color: 'hsl(20, 80%, 60%)' },
         { id: 'cat-10', name: 'Raw Material', type: 'expense', businessId: 'biz-2', color: 'hsl(280, 75%, 55%)' },
-        { id: 'cat-11', name: 'Transporting', type: 'expense', businessId: 'biz-2', color: 'hsl(340, 80%, 65%)' },
-        { id: 'cat-12', name: 'Packing Material', type: 'expense', businessId: 'biz-2', color: 'hsl(160, 70%, 45%)' },
-        { id: 'cat-13', name: 'Electricity Bill', type: 'expense', businessId: 'biz-2', color: 'hsl(20, 80%, 60%)' },
-        { id: 'cat-14', name: 'Water Bill', type: 'expense', businessId: 'biz-2', color: 'hsl(280, 75%, 55%)' },
-        // Dairy
+        { id: 'cat-11', name: 'Transport', type: 'expense', businessId: 'biz-2', color: 'hsl(340, 80%, 65%)' },
+        { id: 'cat-12', name: 'Packaging Material', type: 'expense', businessId: 'biz-2', color: 'hsl(160, 70%, 45%)' },
+        { id: 'cat-13', name: 'Electricity Bills', type: 'expense', businessId: 'biz-2', color: 'hsl(20, 80%, 60%)' },
+        { id: 'cat-14', name: 'Water Bills', type: 'expense', businessId: 'biz-2', color: 'hsl(280, 75%, 55%)' },
+        { id: 'cat-33', name: 'New Tool/Equipment', type: 'expense', businessId: 'biz-2', color: 'hsl(340, 80%, 65%)' },
+        { id: 'cat-34', name: 'Bulbs', type: 'expense', businessId: 'biz-2', color: 'hsl(160, 70%, 45%)' },
+        { id: 'cat-35', name: 'Wires', type: 'expense', businessId: 'biz-2', color: 'hsl(20, 80%, 60%)' },
+        { id: 'cat-36', name: 'Maintainance', type: 'expense', businessId: 'biz-2', color: 'hsl(280, 75%, 55%)' },
+        { id: 'cat-102', name: 'Misc', type: 'expense', businessId: 'biz-2', color: 'hsl(160, 70%, 45%)' },
+
+        // Dairy - Income
         { id: 'cat-15', name: 'Cattle Sale', type: 'income', businessId: 'biz-3', color: 'hsl(220, 80%, 50%)' },
         { id: 'cat-16', name: 'Dairy Income', type: 'income', businessId: 'biz-3', color: 'hsl(340, 80%, 65%)' },
+        { id: 'cat-103', name: 'Misc', type: 'income', businessId: 'biz-3', color: 'hsl(160, 70%, 45%)' },
+        // Dairy - Expense
         { id: 'cat-17', name: 'Feed', type: 'expense', businessId: 'biz-3', color: 'hsl(20, 80%, 60%)' },
-        { id: 'cat-18', name: 'Maintenance', type: 'expense', businessId: 'biz-3', color: 'hsl(280, 75%, 55%)' },
+        { id: 'cat-18', name: 'Maintainance', type: 'expense', businessId: 'biz-3', color: 'hsl(280, 75%, 55%)' },
         { id: 'cat-19', name: 'Repairing', type: 'expense', businessId: 'biz-3', color: 'hsl(340, 80%, 65%)' },
         { id: 'cat-20', name: 'Construction', type: 'expense', businessId: 'biz-3', color: 'hsl(160, 70%, 45%)' },
         { id: 'cat-21', name: 'Cattle Purchase', type: 'expense', businessId: 'biz-3', color: 'hsl(20, 80%, 60%)' },
-        // Agriculture
+        { id: 'cat-104', name: 'Misc', type: 'expense', businessId: 'biz-3', color: 'hsl(160, 70%, 45%)' },
+        
+        // Agriculture - Income
         { id: 'cat-22', name: 'Crop Sale', type: 'income', businessId: 'biz-4', color: 'hsl(220, 80%, 50%)' },
+        { id: 'cat-105', name: 'Misc', type: 'income', businessId: 'biz-4', color: 'hsl(160, 70%, 45%)' },
+        // Agriculture - Expense
         { id: 'cat-23', name: 'Seeds', type: 'expense', businessId: 'biz-4', color: 'hsl(20, 80%, 60%)' },
         { id: 'cat-24', name: 'Labour', type: 'expense', businessId: 'biz-4', color: 'hsl(280, 75%, 55%)' },
         { id: 'cat-25', name: 'Fuel', type: 'expense', businessId: 'biz-4', color: 'hsl(340, 80%, 65%)' },
         { id: 'cat-26', name: 'Land Rent', type: 'expense', businessId: 'biz-4', color: 'hsl(160, 70%, 45%)' },
-        { id: 'cat-27', name: 'Maintenance', type: 'expense', businessId: 'biz-4', color: 'hsl(20, 80%, 60%)' },
+        { id: 'cat-27', name: 'Maintainance', type: 'expense', businessId: 'biz-4', color: 'hsl(20, 80%, 60%)' },
         { id: 'cat-28', name: 'Repairing', type: 'expense', businessId: 'biz-4', color: 'hsl(280, 75%, 55%)' },
         { id: 'cat-29', name: 'Bills', type: 'expense', businessId: 'biz-4', color: 'hsl(340, 80%, 65%)' },
         { id: 'cat-30', name: 'Fertilizers', type: 'expense', businessId: 'biz-4', color: 'hsl(160, 70%, 45%)' },
-        { id: 'cat-31', name: 'New Vehicle/Tool Purchase', type: 'expense', businessId: 'biz-4', color: 'hsl(20, 80%, 60%)' },
-        // Shared
-        { id: 'cat-99', name: 'Misc', type: 'expense', businessId: 'all', color: 'hsl(280, 75%, 55%)' },
-        { id: 'cat-100', name: 'Misc', type: 'income', businessId: 'all', color: 'hsl(160, 70%, 45%)' },
+        { id: 'cat-31', name: 'New Tool/Equipment Purchase', type: 'expense', businessId: 'biz-4', color: 'hsl(20, 80%, 60%)' },
+        { id: 'cat-106', name: 'Misc', type: 'expense', businessId: 'biz-4', color: 'hsl(160, 70%, 45%)' },
+        
     ],
     // The transactions array will now hold both business and house expenses
     transactions: [],
@@ -116,10 +140,11 @@ const addEntryBtns = document.querySelectorAll('#add-entry-btn');
 const deleteModal = document.getElementById('delete-modal');
 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+const typeRadioButtons = document.getElementById('type-radio-buttons');
 
 let currentTransactionIdToDelete = null;
 
-// --- 3. COMMON FUNCTIONS (Sidebar, Modal, CRUD) ---
+// --- 3. COMMON FUNCTIONS (Sidebar, Modal, CRUD, Filtering) ---
 
 /**
  * Populates the business selection dropdown.
@@ -142,21 +167,22 @@ function populateBusinessDropdown() {
 }
 
 /**
- * Populates the category dropdown in the Add Entry modal based on the selected business.
+ * Populates the category dropdown in the Add Entry modal based on the selected business and type.
  * This is only for business transactions.
  * @param {string} businessId The ID of the currently selected business.
+ * @param {string} type The transaction type ('income' or 'expense').
  */
-function populateModalCategoryDropdown(businessId) {
+function populateModalCategoryDropdown(businessId, type = 'income') {
     const categorySelect = document.getElementById('transaction-category');
     const businessSelectModal = document.getElementById('transaction-business');
-
+    
     if (!categorySelect || !businessSelectModal) return;
 
     // Clear existing options
     categorySelect.innerHTML = '';
     
     // Get categories for the selected business and "all" businessId
-    const relevantCategories = categories.filter(cat => cat.businessId === businessId || cat.businessId === 'all');
+    const relevantCategories = categories.filter(cat => cat.businessId === businessId && cat.type === type);
     
     relevantCategories.forEach(category => {
         const option = document.createElement('option');
@@ -176,10 +202,18 @@ function populateModalCategoryDropdown(businessId) {
     businessSelectModal.value = businessId; // Pre-select the current business
     
     // Add a change listener for the modal business select
-    businessSelectModal.addEventListener('change', (e) => {
-        populateModalCategoryDropdown(e.target.value);
-    });
+    businessSelectModal.onchange = (e) => {
+        const selectedType = document.querySelector('input[name="transaction-type"]:checked').value;
+        populateModalCategoryDropdown(e.target.value, selectedType);
+    };
+
+    // Add a change listener for the radio buttons
+    typeRadioButtons.onchange = (e) => {
+        const selectedBusiness = document.getElementById('transaction-business').value;
+        populateModalCategoryDropdown(selectedBusiness, e.target.value);
+    };
 }
+
 
 /**
  * Opens the add entry modal.
@@ -192,7 +226,6 @@ function openModal(type = 'business') {
 
     const selectedBusinessId = localStorage.getItem('selectedBusinessId') || 'all-businesses';
     const businessFields = document.getElementById('business-fields');
-    const typeRadioButtons = document.getElementById('type-radio-buttons');
     const modalTitle = document.getElementById('modal-title');
     const submitBtn = document.getElementById('modal-submit-btn');
 
@@ -208,7 +241,9 @@ function openModal(type = 'business') {
         if (typeRadioButtons) typeRadioButtons.style.display = 'flex';
         modalTitle.textContent = 'Add New Business Transaction';
         submitBtn.textContent = 'Add Transaction';
-        populateModalCategoryDropdown(selectedBusinessId === 'all-businesses' ? businesses[0].id : selectedBusinessId);
+        // Default to income categories when opening the modal
+        document.getElementById('type-income').checked = true;
+        populateModalCategoryDropdown(selectedBusinessId === 'all-businesses' ? businesses[0].id : selectedBusinessId, 'income');
     }
     
     // Set the date input to today's date by default
@@ -240,7 +275,7 @@ function openEditModal(transactionId) {
 
     if (transaction.transactionType === 'business') {
         document.getElementById('transaction-business').value = transaction.businessId;
-        populateModalCategoryDropdown(transaction.businessId); // Repopulate categories for the correct business
+        populateModalCategoryDropdown(transaction.businessId, transaction.type); // Repopulate categories for the correct business and type
         document.getElementById('transaction-category').value = transaction.categoryId;
         document.querySelector(`input[name="transaction-type"][value="${transaction.type}"]`).checked = true;
     }
@@ -403,6 +438,16 @@ function renderDashboard() {
 
     if (selectedBusinessId && selectedBusinessId !== 'all-businesses') {
         filteredTransactions = filteredTransactions.filter(t => t.businessId === selectedBusinessId);
+    }
+
+    // Apply date filter
+    const startDate = document.getElementById('start-date')?.value;
+    const endDate = document.getElementById('end-date')?.value;
+    if (startDate) {
+        filteredTransactions = filteredTransactions.filter(t => t.date >= startDate);
+    }
+    if (endDate) {
+        filteredTransactions = filteredTransactions.filter(t => t.date <= endDate);
     }
 
     // Set dashboard title
@@ -578,7 +623,18 @@ function renderPieChart(transactionsData, type) {
 
 // --- 5. HOUSE EXPENSES PAGE SPECIFIC LOGIC (house.html) ---
 function renderHousePage() {
-    const houseExpenses = transactions.filter(t => t.transactionType === 'house');
+    let houseExpenses = transactions.filter(t => t.transactionType === 'house');
+
+    // Apply date filter
+    const startDate = document.getElementById('start-date-house')?.value;
+    const endDate = document.getElementById('end-date-house')?.value;
+    if (startDate) {
+        houseExpenses = houseExpenses.filter(t => t.date >= startDate);
+    }
+    if (endDate) {
+        houseExpenses = houseExpenses.filter(t => t.date <= endDate);
+    }
+
     const totalHouseExpenses = houseExpenses.reduce((sum, t) => sum + t.amount, 0);
 
     const totalExpensesElement = document.getElementById('total-house-expenses');
@@ -675,6 +731,16 @@ function filterAndRenderTransactions() {
         filteredTransactions = filteredTransactions.filter(t => t.type === typeFilterSelect.value);
     }
 
+    // Apply date filter
+    const startDate = document.getElementById('start-date-all')?.value;
+    const endDate = document.getElementById('end-date-all')?.value;
+    if (startDate) {
+        filteredTransactions = filteredTransactions.filter(t => t.date >= startDate);
+    }
+    if (endDate) {
+        filteredTransactions = filteredTransactions.filter(t => t.date <= endDate);
+    }
+
     // Sort by date (newest first)
     filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -750,12 +816,6 @@ function renderTableRows(transactionsToRender, tableBody, showBusinessDetails = 
             <td class="text-right">${actionsHtml}</td>
         `;
         tableBody.appendChild(row);
-
-        // Add event listeners for new buttons
-        const editButton = row.querySelector('.lucide-edit').closest('button');
-        const deleteButton = row.querySelector('.lucide-trash-2').closest('button');
-        editButton.onclick = () => openEditModal(t.id);
-        deleteButton.onclick = () => openDeleteModal(t.id);
     });
 }
 
@@ -776,6 +836,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-render the correct page content after business selection changes
         if (document.title.includes('Dashboard')) {
             renderDashboard();
+        } else if (document.title.includes('House Expenses')) {
+            renderHousePage();
         } else if (document.title.includes('All Transactions')) {
             filterAndRenderTransactions();
         }
@@ -811,6 +873,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme toggle button
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     themeToggleBtn?.addEventListener('click', toggleTheme);
+    
+    // Event listeners for date filters
+    const startDateDashboard = document.getElementById('start-date');
+    const endDateDashboard = document.getElementById('end-date');
+    if (startDateDashboard && endDateDashboard) {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
+        startDateDashboard.value = firstDayOfMonth;
+        endDateDashboard.value = lastDayOfMonth;
+        startDateDashboard.addEventListener('change', renderDashboard);
+        endDateDashboard.addEventListener('change', renderDashboard);
+    }
+    
+    const startDateHouse = document.getElementById('start-date-house');
+    const endDateHouse = document.getElementById('end-date-house');
+    if (startDateHouse && endDateHouse) {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
+        startDateHouse.value = firstDayOfMonth;
+        endDateHouse.value = lastDayOfMonth;
+        startDateHouse.addEventListener('change', renderHousePage);
+        endDateHouse.addEventListener('change', renderHousePage);
+    }
+    
+    const startDateAll = document.getElementById('start-date-all');
+    const endDateAll = document.getElementById('end-date-all');
+    if (startDateAll && endDateAll) {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
+        startDateAll.value = firstDayOfMonth;
+        endDateAll.value = lastDayOfMonth;
+        startDateAll.addEventListener('change', filterAndRenderTransactions);
+        endDateAll.addEventListener('change', filterAndRenderTransactions);
+    }
 
     // Call the appropriate render function based on the current page
     if (document.title.includes('Dashboard')) {
